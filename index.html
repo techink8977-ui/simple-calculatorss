@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Techin Karakorn - Portfolio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { fog: '#EDF1F2', ink: '#0E1B2A', box: '#1F5FBF', signal: '#FFC93C', teal: '#1C8C86', mist: '#D5DEE1' },
+  fontFamily: {
+    display: ['Bai Jamjuree', 'IBM Plex Sans Thai', 'sans-serif'],
+    sans: ['IBM Plex Sans Thai', 'sans-serif'],
+    mono: ['IBM Plex Mono', 'ui-monospace', 'monospace']
+  }
+}}}
+</script>
+<style>
+  /* Corrugated container wall: the one signature texture of the page */
+  .ribs { background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 3px, transparent 3px 16px); }
+  .ribs-light { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 3px, transparent 3px 16px); }
+  a:focus-visible { outline: 3px solid #FFC93C; outline-offset: 3px; }
+  .btn { transition: transform .15s ease, box-shadow .15s ease; }
+  .btn:hover { transform: translate(-2px,-2px); box-shadow: 4px 4px 0 #0E1B2A; }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body class="bg-fog font-sans text-ink antialiased selection:bg-signal">
+
+<!-- Navbar -->
+<header class="sticky top-0 z-50 border-b-2 border-ink bg-fog/95 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+    <a href="#" class="font-display text-xl font-bold tracking-tight">Techin<span class="text-box">.K</span></a>
+    <nav class="hidden gap-8 text-sm font-medium md:flex">
+      <a href="#about" class="hover:text-box">เกี่ยวกับฉัน</a>
+      <a href="#skills" class="hover:text-box">ทักษะ</a>
+      <a href="#projects" class="hover:text-box">ผลงาน</a>
+      <a href="#contact" class="hover:text-box">ติดต่อ</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- Hero -->
+<section class="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-24 pt-14 md:pt-20 lg:grid-cols-[1.25fr_1fr]">
+  <div>
+    <p class="mb-5 text-lg text-slate-600">สวัสดีครับ ผมคือ</p>
+    <h1 class="font-display text-6xl font-bold leading-[1.05] tracking-tight md:text-8xl">
+      เตชิน<br>การะกรณ์
+    </h1>
+    <p class="mt-4 font-display text-2xl font-medium text-box md:text-3xl">Techin Karakorn</p>
+    <p class="mt-8 max-w-md text-lg leading-relaxed text-slate-700">
+      นักพัฒนาซอฟต์แวร์และนักศึกษา ชอบสร้างเว็บไซต์ และจัดระบบให้รันได้เสถียรบน Docker
+    </p>
+    <div class="mt-10 flex flex-wrap gap-4">
+      <a href="#projects" class="btn border-2 border-ink bg-signal px-6 py-3 font-semibold">ดูผลงานของฉัน</a>
+      <a href="#contact" class="btn border-2 border-ink bg-white px-6 py-3 font-semibold">ติดต่อฉัน</a>
+    </div>
+  </div>
+
+  <!-- Photo in a container frame -->
+  <figure class="mx-auto w-full max-w-sm">
+    <div class="ribs relative bg-box p-4 shadow-[8px_8px_0_#0E1B2A] ring-2 ring-ink">
+      <div class="relative aspect-[4/5] overflow-hidden bg-mist">
+        <!-- Placeholder shows until images/profile.jpg exists -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center text-slate-500">
+          <span class="font-display text-6xl font-bold text-box/40">TK</span>
+          <span class="text-sm">ใส่รูปของคุณที่<br><code class="font-mono text-xs">images/profile.jpg</code></span>
+        </div>
+        <img src="images/profile.jpg" alt="รูปของเตชินท์ การกรณ์"
+             class="absolute inset-0 z-10 h-full w-full object-cover"
+             onerror="this.style.display='none'">
+      </div>
+      <div class="absolute -bottom-4 left-6 z-20 bg-signal px-3 py-1 font-mono text-xs font-medium ring-2 ring-ink">
+        TKN 2026 &nbsp;22G1
+      </div>
+    </div>
+  </figure>
+</section>
+
+<!-- About -->
+<section id="about" class="ribs-light bg-box py-20 text-white">
+  <div class="mx-auto grid max-w-6xl gap-10 px-6 md:grid-cols-[1fr_2fr]">
+    <h2 class="font-display text-4xl font-bold">เกี่ยวกับฉัน</h2>
+    <div class="max-w-2xl space-y-5 text-lg leading-relaxed">
+      <p>
+        ผม <strong class="font-semibold">เตชิน การกรณ์ (Techin Karakorn)</strong>
+        กำลังศึกษาและพัฒนาทักษะด้านการเขียนโปรแกรมและการจัดการระบบโครงสร้างพื้นฐาน (Infrastructure)
+      </p>
+      <p class="text-white/85">
+        สนใจการทำงานร่วมกับ Docker, Git และการพัฒนา Web Application ให้มีความเสถียรและใช้งานง่าย
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Skills -->
+<section id="skills" class="mx-auto max-w-6xl px-6 py-24">
+  <h2 class="mb-12 font-display text-4xl font-bold">ทักษะความสามารถ</h2>
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="ribs relative flex min-h-[200px] flex-col justify-end bg-box p-5 text-white ring-2 ring-ink">
+      <span class="mb-auto text-3xl" aria-hidden="true">💻</span>
+      <h3 class="font-display text-xl font-bold">Frontend</h3>
+      <p class="font-mono text-sm">HTML, CSS, Tailwind</p>
+    </div>
+    <div class="ribs relative flex min-h-[200px] flex-col justify-end bg-signal p-5 ring-2 ring-ink">
+      <span class="mb-auto text-3xl" aria-hidden="true">🐳</span>
+      <h3 class="font-display text-xl font-bold">Container</h3>
+      <p class="font-mono text-sm">Docker &amp; Compose</p>
+    </div>
+    <div class="ribs relative flex min-h-[200px] flex-col justify-end bg-ink p-5 text-white ring-2 ring-ink">
+      <span class="mb-auto text-3xl" aria-hidden="true">🔄</span>
+      <h3 class="font-display text-xl font-bold">Version Control</h3>
+      <p class="font-mono text-sm">Git &amp; GitLab</p>
+    </div>
+    <div class="ribs relative flex min-h-[200px] flex-col justify-end bg-teal p-5 text-white ring-2 ring-ink">
+      <span class="mb-auto text-3xl" aria-hidden="true">🗄️</span>
+      <h3 class="font-display text-xl font-bold">Database</h3>
+      <p class="font-mono text-sm">MySQL</p>
+    </div>
+  </div>
+</section>
+
+<!-- Projects -->
+<section id="projects" class="border-t-2 border-ink bg-white py-24">
+  <div class="mx-auto max-w-6xl px-6">
+    <h2 class="mb-14 font-display text-4xl font-bold">ผลงานเด่น</h2>
+
+    <div class="space-y-20">
+      <!-- Project 1 -->
+      <article class="grid items-center gap-8 md:grid-cols-2">
+        <div class="relative aspect-[16/10] overflow-hidden bg-mist ring-2 ring-ink shadow-[8px_8px_0_#1F5FBF]">
+          <div class="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-slate-500">
+            ใส่ภาพผลงานที่ <code class="ml-1 font-mono text-xs">images/project-docker.jpg</code>
+          </div>
+          <img src="images/project-docker.jpg" alt="ภาพผลงาน Docker Environment และ Web App"
+               class="absolute inset-0 z-10 h-full w-full object-cover" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <h3 class="font-display text-3xl font-bold">Docker Environment &amp; Web App</h3>
+          <p class="mt-4 max-w-md text-lg leading-relaxed text-slate-700">
+            ระบบเว็บแอปพลิเคชันที่รันบน Docker Compose ควบคู่กับการจัดเก็บบน GitLab Repository ส่วนตัว
+          </p>
+          <div class="mt-6 flex flex-wrap gap-2">
+            <span class="bg-box px-3 py-1 font-mono text-xs text-white">Docker</span>
+            <span class="bg-ink px-3 py-1 font-mono text-xs text-white">GitLab</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 2 (image on the right) -->
+      <article class="grid items-center gap-8 md:grid-cols-2">
+        <div class="md:order-2">
+          <div class="relative aspect-[16/10] overflow-hidden bg-mist ring-2 ring-ink shadow-[8px_8px_0_#FFC93C]">
+            <div class="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-slate-500">
+              ใส่ภาพผลงานที่ <code class="ml-1 font-mono text-xs">images/project-portfolio.jpg</code>
+            </div>
+            <img src="images/project-portfolio.jpg" alt="ภาพผลงาน Personal Portfolio"
+                 class="absolute inset-0 z-10 h-full w-full object-cover" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div class="md:order-1">
+          <h3 class="font-display text-3xl font-bold">Personal Portfolio</h3>
+          <p class="mt-4 max-w-md text-lg leading-relaxed text-slate-700">
+            เว็บไซต์แนะนำตัวส่วนตัว ดีไซน์ทันสมัยด้วย Tailwind CSS แสดงข้อมูลประวัติ ทักษะ และช่องทางติดต่อ
+          </p>
+          <div class="mt-6 flex flex-wrap gap-2">
+            <span class="bg-box px-3 py-1 font-mono text-xs text-white">HTML5</span>
+            <span class="bg-teal px-3 py-1 font-mono text-xs text-white">Tailwind CSS</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Contact -->
+<footer id="contact" class="ribs-light bg-ink py-24 text-white">
+  <div class="mx-auto max-w-6xl px-6">
+    <h2 class="font-display text-4xl font-bold md:text-5xl">ติดต่อฉัน</h2>
+    <p class="mt-4 max-w-md text-lg text-white/75">
+      สนใจพูดคุย แลกเปลี่ยนความรู้ หรือสอบถามงาน ส่งอีเมลมาได้เลยครับ
+    </p>
+    <a href="mailto:techin.k8977@gmail.com"
+       class="btn mt-8 inline-block break-all border-2 border-signal bg-signal px-6 py-4 font-mono text-base font-medium text-ink hover:shadow-[4px_4px_0_#FFFFFF] md:text-lg">
+      techin.k8977@gmail.com
+    </a>
+    <p class="mt-20 text-sm text-white/50">&copy; 2026 Techin Karakorn. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>

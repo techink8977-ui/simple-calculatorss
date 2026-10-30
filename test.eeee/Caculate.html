@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>try{var t=localStorage.getItem('sc8-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<title>เครื่องคิดเลขวิทยาศาสตร์ SC-8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --paper:#f3f3f1; --ink:#0b0b0b;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --paper:#0b0b0b; --ink:#f3f3f1; } }
+:root[data-theme="dark"]{ --paper:#0b0b0b; --ink:#f3f3f1; }
+:root{ --mute:color-mix(in srgb,var(--ink) 9%,var(--paper)); --faint:color-mix(in srgb,var(--ink) 55%,transparent); }
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  min-height:100%;margin:0;display:flex;padding:72px 22px 22px;
+  font-family:'Chakra Petch',system-ui,sans-serif;color:var(--ink);background-color:var(--paper);
+  background-image:radial-gradient(color-mix(in srgb,var(--ink) 24%,transparent) 1px,transparent 1.7px);
+  background-size:12px 12px;
+}
+.calc{
+  width:min(100%,1060px);margin:auto;padding:18px 20px 24px;background:var(--paper);
+  border:3px solid var(--ink);box-shadow:12px 12px 0 var(--ink);
+}
+.top{display:flex;align-items:center;gap:16px;padding-bottom:12px;margin-bottom:16px;border-bottom:3px solid var(--ink);font-weight:700;font-size:15px;white-space:nowrap}
+.top b{font-size:24px;letter-spacing:1px;padding:0 8px;background:var(--ink);color:var(--paper)}
+.bars{flex:1;height:16px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 9px,var(--ink) 9px 12px,transparent 12px 15px)}
+.lcd{
+  position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(150px,1fr) minmax(0,3.2fr);gap:18px;
+  min-height:180px;padding:16px 24px 30px;margin-bottom:22px;background:var(--ink);color:var(--paper);
+  outline:2px solid var(--paper);outline-offset:-8px;
+}
+.side{display:flex;flex-direction:column;justify-content:space-between;gap:10px;padding-right:16px;border-right:1px dashed var(--faint);min-width:0}
+.stat{display:flex;gap:8px;font-size:12px;font-weight:700}
+.stat span{padding:1px 7px;border:1px solid var(--paper);opacity:.35}
+.stat span.on{opacity:1;background:var(--paper);color:var(--ink)}
+.hist{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.hist button{all:unset;cursor:pointer;font-size:13px;opacity:.65;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist button:hover,.hist button:focus-visible{opacity:1;text-decoration:underline}
+.hist button:focus-visible{outline:2px dashed var(--paper);outline-offset:2px}
+.mainv{display:flex;flex-direction:column;justify-content:flex-end;text-align:right;min-width:0}
+#expr{min-height:26px;font-size:19px;letter-spacing:.5px;opacity:.65;overflow-wrap:anywhere}
+#out{font-size:78px;font-weight:700;line-height:1.05;letter-spacing:-1px;overflow-wrap:anywhere;margin-top:4px}
+#out.m{font-size:54px}#out.s{font-size:36px}#out.err{font-size:24px;letter-spacing:0}
+.ruler{position:absolute;left:0;right:0;bottom:0;height:12px;opacity:.55;
+  background:linear-gradient(90deg,var(--paper) 1px,transparent 1px) 0 100%/48px 12px repeat-x,linear-gradient(90deg,var(--paper) 1px,transparent 1px) 0 100%/8px 6px repeat-x}
+.heat{position:absolute;left:0;bottom:0;height:5px;width:100%;background:var(--paper);opacity:0}
+.heat.go{animation:sweep .7s ease-out}
+@keyframes sweep{0%{transform:scaleX(0);transform-origin:left;opacity:1}100%{transform:scaleX(1);transform-origin:left;opacity:0}}
+.deck{display:grid;grid-template-columns:2fr 4fr 2fr;gap:24px}
+.wing{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:54px;gap:12px 10px;padding:12px;border:2px dashed var(--ink);
+  background:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--ink) 12%,transparent) 6px 7px)}
+.wing.mid{grid-template-columns:repeat(4,1fr);gap:12px;border-style:solid;background:none}
+button.k{
+  font:700 22px 'Chakra Petch',system-ui,sans-serif;border:2px solid var(--ink);border-radius:0;cursor:pointer;
+  color:var(--ink);background:var(--paper);box-shadow:4px 4px 0 var(--ink);
+  transition:transform .06s,box-shadow .06s,background .12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.wing:not(.mid) .k{font-size:16px}
+button.k:hover{background:var(--mute)}
+button.k:active,button.k.down{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+button.k:focus-visible{outline:3px dashed var(--ink);outline-offset:3px}
+.k.fn{background:var(--mute)}
+.k.op,.k.on,.k.eq{background:var(--ink);color:var(--paper)}
+.k.op{font-size:28px}
+.k.op:hover,.k.on:hover,.k.eq:hover{background:var(--ink);opacity:.86}
+.k.eq{font-size:32px;background-image:repeating-linear-gradient(135deg,transparent 0 10px,color-mix(in srgb,var(--paper) 16%,transparent) 10px 12px)}
+.k.w3{grid-column:span 3}
+@media (max-width:920px){
+  .deck{grid-template-columns:1fr 1fr;gap:18px}
+  .wing.mid{grid-column:1/-1;order:-1}
+  .lcd{grid-template-columns:1fr;min-height:0}
+  .side{flex-direction:row;align-items:flex-start;justify-content:space-between;padding:0 0 10px;border-right:0;border-bottom:1px dashed var(--faint)}
+  #out{font-size:56px}#out.m{font-size:42px}#out.s{font-size:28px}
+}
+@media (max-width:520px){
+  body{padding:66px 12px 12px}.calc{padding:12px;box-shadow:6px 6px 0 var(--ink)}
+  .top span{display:none}.wing{padding:8px;gap:10px 8px;grid-auto-rows:46px}.wing.mid{gap:10px 8px}
+  .wing:not(.mid) .k{font-size:14px}button.k{box-shadow:3px 3px 0 var(--ink)}
+  #out{font-size:44px}.lcd{padding:12px 16px 24px}
+}
+@media (prefers-reduced-motion:reduce){.heat.go{animation:none}button.k{transition:none}}
+#tip{position:fixed;left:0;top:0;z-index:50;max-width:230px;padding:8px 11px;pointer-events:none;
+  background:var(--ink);color:var(--paper);border:2px solid var(--paper);box-shadow:0 0 0 2px var(--ink),4px 4px 0 2px var(--ink);
+  font-size:13px;line-height:1.4;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s}
+#tip.show{opacity:1;transform:none}
+#tip b{display:block;font-size:15px;margin-bottom:2px}
+@media (prefers-reduced-motion:reduce){#tip{transition:none}}
+.hbtn,.tb{
+  display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;font:700 16px 'Chakra Petch',system-ui,sans-serif;
+  color:var(--ink);background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);cursor:pointer;
+  transition:transform .06s,box-shadow .06s}
+.hbtn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.hbtn:focus-visible,.hpanel button:focus-visible{outline:3px dashed var(--ink);outline-offset:3px}
+.hbtn i{font-style:normal;min-width:24px;padding:0 6px;text-align:center;background:var(--ink);color:var(--paper);font-size:14px;line-height:22px}
+.hbtn .caret{display:inline-block;transition:transform .16s}
+.hbtn.open{background:var(--ink);color:var(--paper)}
+.hbtn.open i{background:var(--paper);color:var(--ink)}
+.hbtn.open .caret{transform:rotate(180deg)}
+.hbtn.open:focus-visible{outline-color:var(--ink)}
+.hpanel{position:fixed;z-index:40;top:calc(14px + 44px + 14px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));
+  width:min(400px,calc(100vw - 28px));max-height:min(68vh,560px);display:flex;flex-direction:column;
+  background:var(--paper);border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);
+  transform-origin:top right;opacity:0;visibility:hidden;transform:translateY(-14px) scaleY(.94);pointer-events:none;
+  transition:opacity .16s,transform .16s,visibility 0s linear .16s}
+.hpanel.open{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .16s,transform .16s,visibility 0s}
+.hhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--ink);color:var(--paper)}
+.hhead b{font-size:16px}
+.hclr{font:700 13px 'Chakra Petch',system-ui,sans-serif;color:var(--paper);background:none;border:1px solid var(--paper);padding:3px 10px;cursor:pointer}
+.hclr:hover{background:var(--paper);color:var(--ink)}
+.hhead button:focus-visible{outline-color:var(--paper)}
+#hlist{list-style:none;margin:0;padding:0;overflow:auto;overscroll-behavior:contain}
+#hlist li{position:relative;display:grid;gap:2px;padding:10px 14px;border-bottom:1px dashed var(--ink)}
+#hlist li:hover{background:var(--mute)}
+#hlist time{position:absolute;top:10px;right:14px;font-size:12px;opacity:.55}
+.he,.hr{all:unset;cursor:pointer;display:block;max-width:calc(100% - 60px);overflow-wrap:anywhere}
+.he{font-size:14px;opacity:.65}.hr{font-size:22px;font-weight:700}
+.he:hover,.hr:hover{text-decoration:underline}
+.hempty{padding:22px 14px!important;font-size:14px;opacity:.65}
+@media (prefers-reduced-motion:reduce){.hpanel,.hbtn,.hbtn .caret{transition:none}}
+.tools{position:fixed;z-index:41;top:calc(14px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));display:flex;gap:12px;align-items:flex-start}
+.tb:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.tb:focus-visible{outline:3px dashed var(--ink);outline-offset:3px}
+.tb.open{background:var(--ink);color:var(--paper)}
+.tb .caret{display:inline-block;transition:transform .16s}
+.tb.open .caret{transform:rotate(180deg)}
+.lwrap{position:relative}
+.lmenu{position:absolute;top:calc(100% + 12px);right:0;width:min(230px,calc(100vw - 28px));display:flex;flex-direction:column;
+  background:var(--paper);border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);
+  opacity:0;visibility:hidden;transform:translateY(-12px);pointer-events:none;transition:opacity .16s,transform .16s,visibility 0s linear .16s}
+.lmenu.open{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .16s,transform .16s,visibility 0s}
+.lmenu button{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px dashed var(--ink);font-weight:700;font-size:16px}
+.lmenu button:last-child{border-bottom:0}
+.lmenu button span:last-child{opacity:.6;font-weight:400}
+.lmenu button:hover{background:var(--mute)}
+.lmenu button.on{background:var(--ink);color:var(--paper)}
+.lmenu button:focus-visible{outline:3px dashed var(--ink);outline-offset:-5px}
+.lmenu button.on:focus-visible{outline-color:var(--paper)}
+.k .dg{display:block;font-size:22px;line-height:1.05}
+.k .dr{display:block;font-size:10px;font-weight:600;line-height:1.15;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#say{display:grid;gap:4px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--faint);font-size:16px;line-height:1.35}
+#say[hidden]{display:none}
+#say div{overflow-wrap:anywhere}
+#say i{font-style:normal;font-size:11px;margin-right:10px;padding:0 6px;border:1px solid var(--paper);opacity:.6}
+@media (max-width:520px){.tb .t{display:none}.hbtn,.tb{padding:0 10px}.tools{gap:8px}#say{font-size:14px}.k .dg{font-size:19px}.k .dr{font-size:9px}}
+@media (prefers-reduced-motion:reduce){.lmenu,.tb .caret{transition:none}}
+</style>
+</head>
+<body>
+<main class="calc" aria-label="เครื่องคิดเลขวิทยาศาสตร์">
+  <header class="top"><b>SC-8</b><i class="bars"></i><span>เครื่องคิดเลขวิทยาศาสตร์</span></header>
+  <section class="lcd" aria-live="polite">
+    <div class="side">
+      <div class="stat"><span id="sDeg" class="on">DEG</span><span id="s2nd">2nd</span><span id="sM">M</span></div>
+      <div class="hist" id="hist"></div>
+    </div>
+    <div class="mainv"><div id="expr"></div><div id="out">0</div>
+      <div id="say" hidden><div><i>เขียน</i><span id="sayW"></span></div><div><i>อ่าน</i><span id="sayR"></span></div></div>
+    </div>
+    <div class="ruler"></div><div class="heat" id="heat"></div>
+  </section>
+  <div class="deck">
+    <div class="wing" id="wl"></div>
+    <div class="wing mid" id="mid"></div>
+    <div class="wing" id="wr"></div>
+  </div>
+</main>
+<div class="tools">
+  <button class="tb" id="tbtn" aria-label="สลับโหมดกลางวัน กลางคืน"><span id="ticon" aria-hidden="true">☀</span><span class="t" id="ttxt">กลางวัน</span></button>
+  <div class="lwrap" id="lwrap">
+    <button class="tb" id="lbtn" aria-haspopup="true" aria-expanded="false" aria-controls="lmenu" aria-label="เลือกภาษาสำหรับคำอ่านตัวเลข"><span aria-hidden="true">A文</span><span class="t" id="ltxt">ภาษา</span><span class="caret" aria-hidden="true">▾</span></button>
+    <div class="lmenu" id="lmenu" role="group" aria-label="เลือกภาษาที่ใช้อ่านตัวเลข"></div>
+  </div>
+  <button class="hbtn tb" id="hbtn" aria-expanded="false" aria-controls="hpanel">ประวัติ <i id="hcount">0</i><span class="caret" aria-hidden="true">▾</span></button>
+</div>
+<aside class="hpanel" id="hpanel" aria-label="ประวัติการคำนวณ">
+  <div class="hhead"><b>ประวัติการคำนวณ</b><button class="hclr" id="hclr">ล้างทั้งหมด</button></div>
+  <ol id="hlist"></ol>
+</aside>
+
+<script>
+(function(){
+  var LEFT=[
+    ['2nd','!2ND'],['DEG','!DEG'],['sin','sin(','sin⁻¹','asin('],['cos','cos(','cos⁻¹','acos('],
+    ['tan','tan(','tan⁻¹','atan('],['π','π'],['log','log(','10ˣ','10^('],['ln','ln(','eˣ','e^('],
+    ['xʸ','^'],['e','e'],['EXP','EXP'],['Rand','!RAND']
+  ];
+  var RIGHT=[
+    ['√','√(','∛','∛('],['x²','^2','x³','^3'],['x!','!','sinh','sinh('],['1/x','^(−1)','cosh','cosh('],
+    ['|x|','abs(','tanh','tanh('],['mod','mod'],['nCr','C','nPr','P'],['Ans','Ans'],
+    ['MC','!MC'],['MR','!MR'],['M+','!MP'],['M−','!MM']
+  ];
+  var PAD=[
+    ['AC','!AC','fn'],['⌫','!BS','fn'],['(','(','fn'],[')',')','fn'],
+    ['7','7'],['8','8'],['9','9'],['÷','÷','op'],
+    ['4','4'],['5','5'],['6','6'],['×','×','op'],
+    ['1','1'],['2','2'],['3','3'],['−','−','op'],
+    ['±','!SIGN','fn'],['0','0'],['.','.'],['+','+','op'],
+    ['%','%','fn'],['=','!EQ','eq w3']
+  ];
+  var sci=document.getElementById('wl'), sci2=document.getElementById('wr'), pad=document.getElementById('mid'),
+      exprEl=document.getElementById('expr'), out=document.getElementById('out'),
+      histEl=document.getElementById('hist'), heat=document.getElementById('heat'),
+      sDeg=document.getElementById('sDeg'), s2nd=document.getElementById('s2nd'), sM=document.getElementById('sM');
+  var DEG=true, second=false, mem=0, ans=0, expr='', done=false, hist=[], errMsg='', lastGood='0';
+  var btns=[];
+
+  function mk(d,box,cls){
+    var b=document.createElement('button');
+    b.className='k'+(cls?' '+cls:'');
+    b.dataset.la=d[0]; b.dataset.ka=d[1];
+    if(d[3]){ b.dataset.lb=d[2]; b.dataset.kb=d[3]; }
+    b.textContent=d[0];
+    b.setAttribute('aria-label',d[0]);
+    box.appendChild(b); btns.push(b);
+  }
+  LEFT.forEach(function(d){ mk(d,sci,''); });
+  RIGHT.forEach(function(d){ mk(d,sci2,''); });
+  PAD.forEach(function(d){ mk(d,pad,d[2]); });
+  function keyOf(b){ return second&&b.dataset.kb?b.dataset.kb:b.dataset.ka; }
+  function relabel(){
+    btns.forEach(function(b){
+      if(b.dataset.kb){ b.textContent=second?b.dataset.lb:b.dataset.la; b.setAttribute('aria-label',b.textContent); }
+      var k=b.dataset.ka;
+      if(k==='!2ND') b.classList.toggle('on',second);
+      if(k==='!DEG'){ b.textContent=DEG?'DEG':'RAD'; b.classList.add('on'); }
+    });
+  }
+
+  /* ---------- parser ---------- */
+  var FN=['sin','cos','tan','asin','acos','atan','sinh','cosh','tanh','log','ln','abs','√','∛'];
+  var TOK=/^(?:(\d+\.?\d*|\.\d+)(?:E([+−-]?\d+))?|(asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|abs|Ans|mod|C|P|e|π|√|∛)|([+−×÷^!%()-]))/;
+  function fail(m){ throw new Error(m); }
+  function fact(n){ if(n!==Math.floor(n)||n<0||n>170) fail('x! ต้องเป็นจำนวนเต็ม 0–170'); var r=1; for(var i=2;i<=n;i++) r*=i; return r; }
+  function nCr(n,r,perm){
+    if(n!==Math.floor(n)||r!==Math.floor(r)||r<0||r>n) fail('nCr/nPr ต้องเป็นจำนวนเต็ม และ 0 ≤ r ≤ n');
+    var v=1; for(var i=0;i<r;i++){ v*=(n-i); if(!perm) v/=(i+1); } return Math.round(v);
+  }
+  function fn(name,a){
+    var k=DEG?Math.PI/180:1, r;
+    switch(name){
+      case 'sin': r=Math.sin(a*k); break;
+      case 'cos': r=Math.cos(a*k); break;
+      case 'tan':
+        if(DEG?Math.abs(a%180)===90:Math.abs(Math.cos(a))<1e-15) fail('tan ไม่มีค่าที่มุมนี้');
+        r=Math.tan(a*k); break;
+      case 'asin': case 'acos':
+        if(Math.abs(a)>1) fail('ค่าต้องอยู่ระหว่าง −1 ถึง 1');
+        r=(name==='asin'?Math.asin(a):Math.acos(a))/k; break;
+      case 'atan': r=Math.atan(a)/k; break;
+      case 'sinh': r=Math.sinh(a); break;
+      case 'cosh': r=Math.cosh(a); break;
+      case 'tanh': r=Math.tanh(a); break;
+      case 'log': if(a<=0) fail('log ต้องใช้ค่ามากกว่า 0'); r=Math.log10(a); break;
+      case 'ln': if(a<=0) fail('ln ต้องใช้ค่ามากกว่า 0'); r=Math.log(a); break;
+      case '√': if(a<0) fail('รากที่สองของจำนวนลบไม่ได้'); r=Math.sqrt(a); break;
+      case '∛': r=Math.cbrt(a); break;
+      case 'abs': r=Math.abs(a); break;
+    }
+    return Math.abs(r)<1e-15?0:r;
+  }
+  function ev(s){
+    var t=[], m;
+    while(s.length){
+      m=s.match(TOK); if(!m) fail('รูปแบบไม่ถูกต้อง');
+      s=s.slice(m[0].length);
+      if(m[1]!==undefined) t.push({n:parseFloat(m[1]+(m[2]?'e'+m[2].replace('−','-'):''))});
+      else t.push({s:m[3]||m[4]});
+    }
+    if(!t.length) fail('ไม่มีนิพจน์');
+    var p=0;
+    function pk(){ return t[p]; }
+    function isVal(x){ return x&&(x.n!==undefined||x.s==='π'||x.s==='e'||x.s==='Ans'||x.s==='('||FN.indexOf(x.s)>-1); }
+    function expr(){
+      var v=term();
+      while(pk()&&(pk().s==='+'||pk().s==='−'||pk().s==='-')){ var o=t[p++].s; var r=term(); v=o==='+'?v+r:v-r; }
+      return v;
+    }
+    function term(){
+      var v=unary(), x;
+      for(;;){
+        x=pk();
+        if(x&&(x.s==='×'||x.s==='÷'||x.s==='mod'||x.s==='C'||x.s==='P')){
+          p++; var r=unary();
+          if(x.s==='×') v*=r;
+          else if(x.s==='÷'){ if(r===0) fail('หารด้วย 0 ไม่ได้'); v/=r; }
+          else if(x.s==='mod'){ if(r===0) fail('mod ด้วย 0 ไม่ได้'); v=v%r; }
+          else v=nCr(v,r,x.s==='P');
+        }else if(isVal(x)){ v*=unary(); }
+        else break;
+      }
+      return v;
+    }
+    function unary(){
+      var x=pk();
+      if(x&&(x.s==='−'||x.s==='-')){ p++; return -unary(); }
+      if(x&&x.s==='+'){ p++; return unary(); }
+      return power();
+    }
+    function power(){
+      var b=post();
+      if(pk()&&pk().s==='^'){ p++; var e=unary(); var r=Math.pow(b,e); if(isNaN(r)) fail('คำนวณไม่ได้'); return r; }
+      return b;
+    }
+    function post(){
+      var v=prim();
+      while(pk()&&(pk().s==='!'||pk().s==='%')){ v=t[p++].s==='!'?fact(v):v/100; }
+      return v;
+    }
+    function prim(){
+      var x=t[p++];
+      if(!x) fail('นิพจน์ไม่สมบูรณ์');
+      if(x.n!==undefined) return x.n;
+      if(x.s==='π') return Math.PI;
+      if(x.s==='e') return Math.E;
+      if(x.s==='Ans') return ans;
+      if(x.s==='('){ var v=expr(); if(pk()&&pk().s===')') p++; return v; }
+      if(FN.indexOf(x.s)>-1){
+        var a;
+        if(pk()&&pk().s==='('){ p++; a=expr(); if(pk()&&pk().s===')') p++; }
+        else a=post();
+        return fn(x.s,a);
+      }
+      fail('รูปแบบไม่ถูกต้อง');
+    }
+    var v=expr();
+    if(p<t.length) fail('วงเล็บไม่ครบคู่');
+    if(!isFinite(v)) fail('ค่าเกินขอบเขต');
+    return v;
+  }
+
+  /* ---------- formatting ---------- */
+  function fmt(v){
+    v=Number(v.toPrecision(12));
+    if(Math.abs(v)>=1e15||(v!==0&&Math.abs(v)<1e-9)) return v.toExponential(6).replace(/\.?0+e/,'e').replace('e+','×10^');
+    return v.toLocaleString('en-US',{maximumFractionDigits:10});
+  }
+  function plain(v){
+    return String(Number(v.toPrecision(12))).replace('e+','E').replace('e-','E−').replace('-','−');
+  }
+  function flash(){ heat.classList.remove('go'); void heat.offsetWidth; heat.classList.add('go'); }
+  function tryEv(s){
+    try{ return ev(s); }catch(e){}
+    try{ return ev(s.replace(/[+−×÷^]$/,'')); }catch(e){}
+    return null;
+  }
+
+  function render(){
+    exprEl.textContent=expr;
+    var big, cls='';
+    if(errMsg){ big=errMsg; cls='err'; }
+    else if(!expr){ big='0'; lastGood='0'; }
+    else if(!done&&/^−?[\d.]*(E[+−]?\d*)?$/.test(expr)){ big=expr; lastGood=expr; }
+    else{
+      var v=tryEv(expr);
+      if(v!==null){ big=fmt(v); lastGood=big; } else big=lastGood;
+    }
+    out.textContent=big;
+    out.className=cls||(big.length>14?'s':big.length>9?'m':'');
+    if(sayUpdate) sayUpdate(big,cls==='err');
+    sDeg.textContent=DEG?'DEG':'RAD'; s2nd.classList.toggle('on',second); sM.classList.toggle('on',mem!==0);
+    histEl.innerHTML='';
+    hist.slice(-3).forEach(function(h){
+      var b=document.createElement('button');
+      b.textContent=h.e+' = '+h.r; b.setAttribute('aria-label','ใช้ผลลัพธ์ '+h.r);
+      b.onclick=function(){ expr=h.raw; done=true; errMsg=''; render(); };
+      histEl.appendChild(b);
+    });
+    relabel();
+    if(drawPanel) drawPanel();
+  }
+
+  /* ---------- input ---------- */
+  function insert(k){
+    var seg;
+    if(/^[0-9.]$/.test(k)){
+      if(done){ expr=''; done=false; }
+      if(k==='.'){
+        seg=expr.match(/[\d.]*$/)[0];
+        if(seg.indexOf('.')>-1) return;
+        if(seg==='') k='0.';
+      }else if(/(^|[^\d.])0$/.test(expr)) expr=expr.slice(0,-1);
+      expr+=k; return;
+    }
+    if(k==='EXP'){ if(/\d$/.test(expr)&&!/E[+−]?\d*$/.test(expr)){ expr+='E'; done=false; } return; }
+    if(/^[a-z√∛]+\($/.test(k)){
+      if(done){ expr=k+expr+')'; done=false; } else expr+=k;
+      return;
+    }
+    if(['!','%','^2','^3','^(−1)'].indexOf(k)>-1){
+      if(!expr||/[+−×÷^(]$/.test(expr)||/E[+−]?$/.test(expr)) return;
+      done=false; expr+=k; return;
+    }
+    if(['+','−','×','÷','^','mod','C','P'].indexOf(k)>-1){
+      if(!expr){ if(k==='−') expr='−'; return; }
+      if(k==='−'&&/[×÷^(]$/.test(expr)){ expr+=k; done=false; return; }
+      if('+−×÷'.indexOf(k)>-1&&/[+−×÷]$/.test(expr)){ if(expr==='−') return; expr=expr.slice(0,-1)+k; return; }
+      if(/\($/.test(expr)||expr==='−') return;
+      done=false; expr+=k; return;
+    }
+    if(k===')'){
+      if(done) return;
+      var o=(expr.match(/\(/g)||[]).length, c=(expr.match(/\)/g)||[]).length;
+      if(c>=o) return;
+      expr+=k; return;
+    }
+    if(done){ expr=''; done=false; }
+    expr+=k;
+  }
+  function curVal(){ var v=expr?tryEv(expr):null; return v===null?0:v; }
+  function sign(){
+    var m=expr.match(/(\d+\.?\d*|\.\d+)(E[+−]?\d+)?$/);
+    if(!m){ if(!expr) expr='−'; return; }
+    var i=m.index;
+    if(expr[i-1]==='−'&&(i===1||/[+−×÷^(]/.test(expr[i-2]))) expr=expr.slice(0,i-1)+expr.slice(i);
+    else expr=expr.slice(0,i)+'−'+expr.slice(i);
+  }
+  function back(){
+    if(done){ expr=''; done=false; return; }
+    var r=/(?:(?:asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|abs|√|∛)\(|Ans|mod)$/;
+    expr=r.test(expr)?expr.replace(r,''):expr.slice(0,-1);
+  }
+
+  function press(k){
+    errMsg='';
+    if(k.length>1&&k.charAt(0)==='!'){
+      switch(k){
+        case '!AC': expr=''; done=false; lastGood='0'; break;
+        case '!BS': back(); break;
+        case '!SIGN': sign(); break;
+        case '!DEG': DEG=!DEG; break;
+        case '!2ND': second=!second; break;
+        case '!RAND': insert(plain(Math.random())); break;
+        case '!MC': mem=0; break;
+        case '!MR': insert(plain(mem)); break;
+        case '!MP': mem+=curVal(); break;
+        case '!MM': mem-=curVal(); break;
+        case '!EQ':
+          if(!expr) return;
+          try{
+            var v=ev(expr);
+            hist.push({e:expr,r:fmt(v),raw:plain(v),t:Date.now()}); saveHist();
+            ans=v; expr=plain(v); done=true; flash();
+          }catch(e){ errMsg=e.message; }
+          break;
+      }
+    }else insert(k);
+    render();
+  }
+
+  document.querySelector('.calc').addEventListener('click',function(e){
+    var b=e.target.closest('button.k'); if(b) press(keyOf(b));
+  });
+
+  var kmap={'*':'×','x':'×','/':'÷','-':'−','Enter':'!EQ','=':'!EQ','Backspace':'!BS','Escape':'!AC','Delete':'!AC',
+    's':'sin(','c':'cos(','t':'tan(','l':'log(','n':'ln(','r':'√(','p':'π','d':'!DEG','m':'mod'};
+  document.addEventListener('keydown',function(e){
+    if(e.ctrlKey||e.metaKey||e.altKey) return;
+    var k=kmap[e.key]||(/^[0-9.+^()!%e]$/.test(e.key)?e.key:null);
+    if(!k) return;
+    e.preventDefault();
+    var b=btns.filter(function(x){ return keyOf(x)===k||x.dataset.ka===k; })[0];
+    if(b){ b.classList.add('down'); setTimeout(function(){ b.classList.remove('down'); },110); }
+    press(k);
+  });
+  /* ---------- history panel ---------- */
+  var drawPanel, drawn=-1;
+  var hbtn=document.getElementById('hbtn'), hpanel=document.getElementById('hpanel'),
+      hlist=document.getElementById('hlist'), hcount=document.getElementById('hcount');
+  function saveHist(){
+    if(hist.length>100) hist.splice(0,hist.length-100);
+    drawn=-1;
+    try{ localStorage.setItem('sc8-hist',JSON.stringify(hist)); }catch(e){}
+  }
+  try{
+    var saved=JSON.parse(localStorage.getItem('sc8-hist')||'[]');
+    if(Array.isArray(saved)) saved.slice(-100).forEach(function(h){
+      if(h&&typeof h.e==='string'&&typeof h.r==='string'&&typeof h.raw==='string') hist.push({e:h.e,r:h.r,raw:h.raw,t:+h.t||0});
+    });
+  }catch(e){}
+  function openPanel(o){
+    hpanel.classList.toggle('open',o); hbtn.classList.toggle('open',o); hbtn.setAttribute('aria-expanded',String(o));
+    if(o){ hideTip(); hlist.scrollTop=0; }
+  }
+  drawPanel=function(){
+    hcount.textContent=hist.length;
+    if(drawn===hist.length) return;
+    drawn=hist.length;
+    hlist.innerHTML='';
+    if(!hist.length){
+      var li=document.createElement('li'); li.className='hempty';
+      li.textContent='ยังไม่มีประวัติ คำนวณแล้วกด = เพื่อบันทึก'; hlist.appendChild(li); return;
+    }
+    hist.slice().reverse().forEach(function(h){
+      var li=document.createElement('li'), a=document.createElement('button'), b=document.createElement('button'), t=document.createElement('time');
+      a.className='he'; a.textContent=h.e; a.setAttribute('aria-label','นำนิพจน์ '+h.e+' กลับมาแก้ไข');
+      b.className='hr'; b.textContent='= '+h.r; b.setAttribute('aria-label','ใช้ผลลัพธ์ '+h.r);
+      if(h.t) t.textContent=new Date(h.t).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+      a.onclick=function(){ expr=h.e; done=false; errMsg=''; render(); openPanel(false); };
+      b.onclick=function(){ expr=h.raw; done=true; errMsg=''; render(); openPanel(false); };
+      li.appendChild(t); li.appendChild(a); li.appendChild(b); hlist.appendChild(li);
+    });
+  };
+  hbtn.onclick=function(){ openPanel(!hpanel.classList.contains('open')); };
+  document.getElementById('hclr').onclick=function(){ hist.length=0; saveHist(); render(); };
+  document.addEventListener('click',function(e){
+    if(hpanel.classList.contains('open')&&!e.target.closest('#hpanel,#hbtn')) openPanel(false);
+  });
+  document.addEventListener('keydown',function(e){
+    var inside=e.target.closest&&e.target.closest('#hbtn,#hpanel');
+    if(inside){
+      if(e.key==='Enter') e.stopPropagation();
+      else if(e.key==='Escape'){ e.stopPropagation(); openPanel(false); hbtn.focus(); }
+      return;
+    }
+    if(e.ctrlKey||e.metaKey||e.altKey) return;
+    if(e.key==='h'||e.key==='H'){ e.preventDefault(); openPanel(!hpanel.classList.contains('open')); }
+    else if(e.key==='Escape'&&hpanel.classList.contains('open')){ e.stopPropagation(); openPanel(false); }
+  },true);
+
+  /* ---------- theme & language ---------- */
+  var L={
+    th:{n:'ไทย',d:'๐๑๒๓๔๕๖๗๘๙',w:['ศูนย์','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า'],pt:'จุด',ng:'ลบ',ptw:'.',ngw:'−'},
+    en:{n:'English',d:'0123456789',w:['zero','one','two','three','four','five','six','seven','eight','nine'],pt:'point',ng:'minus',ptw:'.',ngw:'−'},
+    zh:{n:'中文',d:'零一二三四五六七八九',w:['líng','yī','èr','sān','sì','wǔ','liù','qī','bā','jiǔ'],pt:'diǎn',ng:'fù',ptw:'点',ngw:'负'},
+    ja:{n:'日本語',d:'零一二三四五六七八九',w:['rei','ichi','ni','san','yon','go','roku','nana','hachi','kyū'],pt:'ten',ng:'mainasu',ptw:'点',ngw:'マイナス'},
+    ko:{n:'한국어',d:'영일이삼사오육칠팔구',w:['yeong','il','i','sam','sa','o','yuk','chil','pal','gu'],pt:'jeom',ng:'maineoseu',ptw:'점',ngw:'마이너스'},
+    ar:{n:'العربية',d:'٠١٢٣٤٥٦٧٨٩',w:['ṣifr','wāḥid','ithnān','thalātha','arbaʿa','khamsa','sitta','sabʿa','thamāniya','tisʿa'],pt:'fāṣila',ng:'sālib',ptw:'٫',ngw:'−'},
+    hi:{n:'हिन्दी',d:'०१२३४५६७८९',w:['śūnya','ek','do','tīn','chār','pāñch','chhah','sāt','āṭh','nau'],pt:'dashamlav',ng:'ṛṇ',ptw:'.',ngw:'−'},
+    es:{n:'Español',d:'0123456789',w:['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve'],pt:'coma',ng:'menos',ptw:'.',ngw:'−'}
+  };
+  var sayUpdate, lang='off', lastBig='0', lastErr=false;
+  function gl(l,c){ return L[l].d.charAt(c); }
+  function dbd(l,str){
+    var A=L[l], W='', R=[];
+    str.split('').forEach(function(c){
+      if(/\d/.test(c)){ W+=gl(l,+c); R.push(A.w[+c]); }
+      else if(c==='.'){ W+=A.ptw; R.push(A.pt); }
+      else if(c==='-'||c==='−'){ W+=A.ngw; R.push(A.ng); }
+      else if(c===','){ W+=(l==='ar'?'٬':','); }
+      else{ W+=c; R.push(c); }
+    });
+    return {W:W,R:R.join(' ')};
+  }
+  function thai(s){
+    var W=L.th.w, P=['','สิบ','ร้อย','พัน','หมื่น','แสน'], g=[], o='';
+    s=s.replace(/^0+(?=\d)/,''); if(s==='0') return W[0];
+    while(s.length>6){ g.unshift(s.slice(-6)); s=s.slice(0,-6); } g.unshift(s);
+    g.forEach(function(x,gi){
+      var n=x.length;
+      for(var i=0;i<n;i++){
+        var d=+x[i], p=n-1-i; if(!d) continue;
+        if(p===0) o+=(d===1&&((n>1&&+x.slice(0,-1)>0)||gi>0))?'เอ็ด':W[d];
+        else if(p===1) o+=d===1?'สิบ':d===2?'ยี่สิบ':W[d]+'สิบ';
+        else o+=W[d]+P[p];
+      }
+      if(gi<g.length-1) o+='ล้าน';
+    });
+    return o;
+  }
+  function eng(s){
+    s=s.replace(/^0+(?=\d)/,''); if(s==='0') return 'zero';
+    var o1=['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],
+        t=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'], sc=['','thousand','million','billion','trillion'], g=[], out=[];
+    while(s.length){ g.unshift(s.slice(-3)); s=s.slice(0,-3); }
+    g.forEach(function(x,gi){
+      var n=+x, w=[]; if(!n) return;
+      if(n>=100) w.push(o1[Math.floor(n/100)]+' hundred');
+      n%=100;
+      if(n>=20) w.push(t[Math.floor(n/10)]+(n%10?'-'+o1[n%10]:'')); else if(n) w.push(o1[n]);
+      out.push(w.join(' ')+(sc[g.length-1-gi]?' '+sc[g.length-1-gi]:''));
+    });
+    return out.join(' ');
+  }
+  function cjk(l,s){
+    s=s.replace(/^0+(?=\d)/,''); if(s==='0') return [[gl(l,0),L[l].w[0]]];
+    var U={zh:[['十','shí'],['百','bǎi'],['千','qiān']],ja:[['十','jū'],['百','hyaku'],['千','sen']],ko:[['십','sip'],['백','baek'],['천','cheon']]}[l],
+        G={zh:[0,['万','wàn'],['亿','yì'],['兆','zhào']],ja:[0,['万','man'],['億','oku'],['兆','chō']],ko:[0,['만','man'],['억','eok'],['조','jo']]}[l],
+        SP={'2_3':'sanbyaku','2_6':'roppyaku','2_8':'happyaku','3_3':'sanzen','3_8':'hassen'},
+        g=[], out=[], pend=false;
+    while(s.length%4) s='0'+s;
+    for(var k=0;k<s.length;k+=4) g.push(s.substr(k,4));
+    g.forEach(function(x,gi){
+      var gp=g.length-1-gi, any=false;
+      for(var i=0;i<4;i++){
+        var d=+x[i], pos=3-i;
+        if(!d){ if(out.length) pend=true; continue; }
+        if(pend&&l==='zh') out.push(['零','líng']);
+        pend=false; any=true;
+        if(l==='ja'&&SP[pos+'_'+d]){ out.push([gl(l,d)+U[pos-1][0],SP[pos+'_'+d]]); continue; }
+        var skip=d===1&&((pos>0&&(l!=='zh'||(pos===1&&!out.length)))||(l==='ko'&&pos===0&&gp===1&&x==='0001'));
+        if(!skip) out.push([gl(l,d),L[l].w[d]]);
+        if(pos>0) out.push(U[pos-1]);
+      }
+      if(any&&gp>0) out.push(G[gp]);
+    });
+    return out;
+  }
+  function say(l,str){
+    var A=L[l], n=str.replace(/,/g,'').replace(/\.$/,''), m=n.match(/^([-−]?)(\d{1,15})(?:\.(\d+))?$/);
+    if(!m||['th','en','zh','ja','ko'].indexOf(l)<0) return dbd(l,str);
+    var neg=!!m[1], ip=m[2], fp=m[3]||'';
+    if(l==='th'||l==='en'){
+      var sp=l==='en'?' ':'';
+      return {
+        W:l==='th'?str.replace(/\d/g,function(c){ return A.d.charAt(+c); }):str,
+        R:(neg?A.ng+sp:'')+(l==='th'?thai(ip):eng(ip))+(fp?sp+A.pt+sp+fp.split('').map(function(c){ return A.w[+c]; }).join(sp):'')
+      };
+    }
+    var tk=neg?[[A.ngw,A.ng]]:[];
+    tk=tk.concat(cjk(l,ip));
+    if(fp){ tk.push([A.ptw,A.pt]); fp.split('').forEach(function(c){ tk.push([gl(l,+c),A.w[+c]]); }); }
+    return {W:tk.map(function(t){ return t[0]; }).join(''),R:tk.map(function(t){ return t[1]; }).join(' ')};
+  }
+  var sayEl=document.getElementById('say'), sayW=document.getElementById('sayW'), sayR=document.getElementById('sayR');
+  sayUpdate=function(big,err){
+    lastBig=big; lastErr=err;
+    if(lang==='off'||err){ sayEl.hidden=true; return; }
+    var r=say(lang,big); sayW.textContent=r.W; sayR.textContent=r.R; sayEl.hidden=false;
+  };
+  function labelKeys(){
+    btns.forEach(function(b){
+      var k=b.dataset.ka;
+      if(!/^[0-9.]$/.test(k)) return;
+      if(lang==='off'){ b.textContent=k; return; }
+      var A=L[lang], a=document.createElement('span'), c=document.createElement('span');
+      a.className='dg'; a.textContent=k==='.'?A.ptw:gl(lang,+k);
+      c.className='dr'; c.textContent=k==='.'?A.pt:A.w[+k];
+      b.textContent=''; b.appendChild(a); b.appendChild(c);
+    });
+  }
+  var lbtn=document.getElementById('lbtn'), lmenu=document.getElementById('lmenu'), ltxt=document.getElementById('ltxt');
+  function openLang(o){
+    lmenu.classList.toggle('open',o); lbtn.classList.toggle('open',o); lbtn.setAttribute('aria-expanded',String(o));
+    if(o) openPanel(false);
+  }
+  function setLang(l){
+    lang=l; try{ localStorage.setItem('sc8-lang',l); }catch(e){}
+    ltxt.textContent=l==='off'?'ภาษา':L[l].n;
+    Array.prototype.forEach.call(lmenu.children,function(b){ b.classList.toggle('on',b.dataset.l===l); b.setAttribute('aria-pressed',String(b.dataset.l===l)); });
+    labelKeys(); sayUpdate(lastBig,lastErr);
+  }
+  ['off','th','en','zh','ja','ko','ar','hi','es'].forEach(function(l){
+    var b=document.createElement('button'), a=document.createElement('span'), c=document.createElement('span');
+    b.type='button'; b.dataset.l=l;
+    a.textContent=l==='off'?'ปิดคำอ่าน':L[l].n; c.textContent=l==='off'?'':L[l].d.slice(1,4);
+    b.appendChild(a); b.appendChild(c);
+    b.onclick=function(){ setLang(l); openLang(false); lbtn.focus(); };
+    lmenu.appendChild(b);
+  });
+  lbtn.onclick=function(){ openLang(!lmenu.classList.contains('open')); };
+  document.addEventListener('click',function(e){
+    if(lmenu.classList.contains('open')&&!e.target.closest('#lwrap')) openLang(false);
+  });
+  document.addEventListener('keydown',function(e){
+    var inside=e.target.closest&&e.target.closest('#lwrap,#tbtn');
+    if(inside){ if(e.key==='Enter') e.stopPropagation(); else if(e.key==='Escape'){ e.stopPropagation(); openLang(false); lbtn.focus(); } return; }
+    if(e.key==='Escape'&&lmenu.classList.contains('open')){ e.stopPropagation(); openLang(false); }
+  },true);
+
+  var tbtn=document.getElementById('tbtn'), ticon=document.getElementById('ticon'), ttxt=document.getElementById('ttxt');
+  function curTheme(){
+    return document.documentElement.dataset.theme||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  }
+  function paintTheme(){
+    var d=curTheme()==='dark';
+    ticon.textContent=d?'☾':'☀'; ttxt.textContent=d?'กลางคืน':'กลางวัน';
+    tbtn.setAttribute('aria-pressed',String(d)); document.documentElement.style.colorScheme=d?'dark':'light';
+  }
+  tbtn.onclick=function(){
+    var n=curTheme()==='dark'?'light':'dark';
+    document.documentElement.dataset.theme=n;
+    try{ localStorage.setItem('sc8-theme',n); }catch(e){}
+    paintTheme();
+  };
+  paintTheme();
+  try{ var sl=localStorage.getItem('sc8-lang'); if(sl&&L[sl]) lang=sl; }catch(e){}
+  setLang(lang);
+
+  /* ---------- tooltips ---------- */
+  var TIPS={
+    '!2ND':'สลับเป็นฟังก์ชันผกผัน เช่น sin → sin⁻¹, log → 10ˣ, √ → ∛',
+    '!DEG':'สลับหน่วยมุมระหว่างองศา (DEG) กับเรเดียน (RAD)',
+    'sin(':'ไซน์ของมุม เช่น sin(30) = 0.5 ในโหมด DEG',
+    'cos(':'โคไซน์ของมุม เช่น cos(60) = 0.5 ในโหมด DEG',
+    'tan(':'แทนเจนต์ของมุม เช่น tan(45) = 1 ในโหมด DEG',
+    'asin(':'ผกผันของ sin หามุมจากค่าระหว่าง −1 ถึง 1',
+    'acos(':'ผกผันของ cos หามุมจากค่าระหว่าง −1 ถึง 1',
+    'atan(':'ผกผันของ tan หามุมจากค่าใดก็ได้',
+    'π':'ค่าคงที่พาย ≈ 3.14159265',
+    'e':'ค่าคงที่ของออยเลอร์ ≈ 2.71828183',
+    'log(':'ลอการิทึมฐาน 10 เช่น log(1000) = 3',
+    'ln(':'ลอการิทึมธรรมชาติ (ฐาน e)',
+    '10^(':'สิบยกกำลัง เช่น 10^(3) = 1000',
+    'e^(':'e ยกกำลัง เช่น e^(1) = 2.718…',
+    '^':'ยกกำลัง เช่น 2 xʸ 3 = 8',
+    'EXP':'ใส่เลขชี้กำลังฐาน 10 เช่น 5 EXP 3 = 5×10³',
+    '!RAND':'สุ่มเลขทศนิยมระหว่าง 0 ถึง 1',
+    '√(':'รากที่สอง เช่น √(9) = 3',
+    '∛(':'รากที่สาม เช่น ∛(27) = 3',
+    '^2':'ยกกำลังสอง เช่น 5 x² = 25',
+    '^3':'ยกกำลังสาม เช่น 3 x³ = 27',
+    '!':'แฟกทอเรียล เช่น 5! = 120 (จำนวนเต็ม 0–170)',
+    'sinh(':'ไฮเพอร์โบลิกไซน์',
+    'cosh(':'ไฮเพอร์โบลิกโคไซน์',
+    'tanh(':'ไฮเพอร์โบลิกแทนเจนต์',
+    '^(−1)':'ส่วนกลับ คือ 1 หารด้วยค่านั้น เช่น 4 → 0.25',
+    'abs(':'ค่าสัมบูรณ์ เช่น |−5| = 5',
+    'mod':'เศษจากการหาร เช่น 10 mod 3 = 1',
+    'C':'จำนวนวิธีเลือก r จาก n แบบไม่สนลำดับ เช่น 5 nCr 2 = 10',
+    'P':'จำนวนวิธีจัดเรียง r จาก n แบบสนลำดับ เช่น 5 nPr 2 = 20',
+    'Ans':'ใช้ผลลัพธ์ล่าสุดที่คำนวณไว้',
+    '!MC':'ล้างค่าในหน่วยความจำ',
+    '!MR':'เรียกค่าในหน่วยความจำมาใช้',
+    '!MP':'บวกค่าปัจจุบันเข้าหน่วยความจำ',
+    '!MM':'ลบค่าปัจจุบันออกจากหน่วยความจำ',
+    '!AC':'ล้างนิพจน์ทั้งหมด (คีย์ลัด Esc)',
+    '!BS':'ลบตัวอักษรตัวสุดท้าย (คีย์ลัด Backspace)',
+    '(':'เปิดวงเล็บ ใช้กำหนดลำดับการคำนวณ',
+    ')':'ปิดวงเล็บ',
+    '÷':'หาร','×':'คูณ','−':'ลบ','+':'บวก',
+    '.':'จุดทศนิยม',
+    '!SIGN':'สลับค่าบวก/ลบของตัวเลขล่าสุด',
+    '%':'หารด้วย 100 เช่น 50% = 0.5',
+    '!EQ':'คำนวณผลลัพธ์ (คีย์ลัด Enter)'
+  };
+  var tip=document.createElement('div'); tip.id='tip'; tip.setAttribute('role','tooltip');
+  document.body.appendChild(tip);
+  var tipBtn=null, tipTimer=0;
+  function showTip(b){
+    var d=TIPS[keyOf(b)]; if(!d){ hideTip(); return; }
+    tipBtn=b;
+    tip.innerHTML='<b></b><span></span>';
+    tip.firstChild.textContent=(b.dataset.kb||b.dataset.ka==='!DEG')?b.textContent:b.dataset.la; tip.lastChild.textContent=d;
+    tip.style.left='0px'; tip.style.top='0px';
+    var r=b.getBoundingClientRect(), w=tip.offsetWidth, h=tip.offsetHeight;
+    var x=Math.min(Math.max(8,r.left+r.width/2-w/2),window.innerWidth-w-8);
+    var y=r.top-h-12; if(y<8) y=r.bottom+12;
+    tip.style.left=x+'px'; tip.style.top=y+'px';
+    tip.classList.add('show'); b.setAttribute('aria-describedby','tip');
+  }
+  function hideTip(){
+    clearTimeout(tipTimer); tip.classList.remove('show');
+    if(tipBtn){ tipBtn.removeAttribute('aria-describedby'); tipBtn=null; }
+  }
+  var calcEl=document.querySelector('.calc');
+  calcEl.addEventListener('pointerover',function(e){
+    if(e.pointerType!=='mouse') return;
+    var b=e.target.closest('button.k'); if(!b||b===tipBtn) return;
+    hideTip(); tipTimer=setTimeout(function(){ showTip(b); },250);
+  });
+  calcEl.addEventListener('pointerout',function(e){ if(e.pointerType==='mouse'&&e.target.closest('button.k')) hideTip(); });
+  calcEl.addEventListener('focusin',function(e){ var b=e.target.closest('button.k'); if(b&&b.matches(':focus-visible')) showTip(b); });
+  calcEl.addEventListener('focusout',hideTip);
+  calcEl.addEventListener('click',function(e){ var b=e.target.closest('button.k'); if(b&&b===tipBtn) showTip(b); });
+  window.addEventListener('scroll',hideTip,true);
+
+  render();
+})();
+</script>
+</body>
+</html>
